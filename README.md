@@ -124,3 +124,5 @@ Commons Fund. The NGI0 Commons Fund is made possible with financial support from
 | ---------------------------- | ---------------------------------- | -------------------------- |
 | ![nlnet](./assets/nlnet.png) | ![European Union](./assets/EU.png) | ![NGI0](./assets/NGI0.png) |
 
+
+<!-- scratch test for the fwci-contrib handoff -->
