@@ -24,12 +24,14 @@ concurrency:
 
 jobs:
   client-agent-integration:
-    # Fork pull requests only. Same-repo pull requests and pushes have secrets
-    # and already submit their job from fwci-test.
+    # STUB (test upstream only): the real workflow also requires
+    #   github.event.workflow_run.head_repository.full_name != github.repository
+    # so it fires for fork pull requests only. Dropped here so an ordinary
+    # same-repo pull request exercises the handoff, since forking into an org
+    # needs a token this account does not have.
     if: >-
       github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_repository.full_name != github.repository
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     # Required reviewers on this environment are the gate. Approving means
     # letting a contributor's firmware run on real hardware, so the reviewer
