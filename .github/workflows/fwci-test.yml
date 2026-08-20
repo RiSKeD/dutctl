@@ -78,14 +78,12 @@ jobs:
           echo "dutctl_path:   ${{ steps.filenames.outputs.dutctl_path }}"
           echo "dutctl_pkg_path: ${{ steps.filenames.outputs.dutctl_pkg_path }}"
 
-      - name: Upload to FirmwareCI
-        uses: docker://firmwareci/action:v6.0
-        with:
-          TOKEN: "${{ secrets.FWCI_TOKEN }}"
-          WORKFLOW_NAME: test-dutctl
+      # STUB (test upstream only): see fwci-contrib.yml.
+      - name: Upload to FirmwareCI (stubbed)
+        env:
           COMMIT_HASH: ${{ github.event.pull_request.head.sha || github.sha }}
-          BINARIES: DUTCTL=${{ steps.filenames.outputs.dutctl_path }};REMOTE_PKG=${{ steps.filenames.outputs.dutctl_pkg_path }};CONFIG=${{ matrix.configfile }}
-          GITHUB_INSTALLATION_ID: 45795153
+        run: |
+          echo "WOULD SUBMIT to FirmwareCI (same-repo path), commit ${COMMIT_HASH}"
 
 
   # Get a list of all configuration files in JSON format

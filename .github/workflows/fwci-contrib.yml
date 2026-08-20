@@ -93,17 +93,17 @@ jobs:
           echo "dutctl_path:     ${DUTCTL_PATH}"
           echo "dutctl_pkg_path: ${DUTCTL_PKG_PATH}"
 
-      - name: Upload to FirmwareCI
-        uses: docker://firmwareci/action:v6.0
-        with:
-          TOKEN: "${{ secrets.FWCI_TOKEN }}"
-          WORKFLOW_NAME: test-dutctl
-          # The workflow_run payload carries the pull request head commit. This
-          # workflow itself runs on the base branch, so auto-detection would
-          # report the wrong commit.
+      # STUB (test upstream only): the real workflow calls
+      # docker://firmwareci/action here. This repository has no FWCI_TOKEN and
+      # no FirmwareCI project, so the submit is replaced by an echo. Everything
+      # above this line is the code under test.
+      - name: Upload to FirmwareCI (stubbed)
+        env:
           COMMIT_HASH: ${{ github.event.workflow_run.head_sha }}
-          # The fork's branch does not exist in this repository, so the
-          # FirmwareCI config has to be resolved against the base branch.
-          BRANCH: main
           BINARIES: DUTCTL=${{ steps.filenames.outputs.dutctl_path }};REMOTE_PKG=${{ steps.filenames.outputs.dutctl_pkg_path }};CONFIG=${{ matrix.configfile }}
-          GITHUB_INSTALLATION_ID: 45795153
+        run: |
+          echo "WOULD SUBMIT to FirmwareCI:"
+          echo "  WORKFLOW_NAME: test-dutctl"
+          echo "  COMMIT_HASH:   ${COMMIT_HASH}"
+          echo "  BRANCH:        main"
+          echo "  BINARIES:      ${BINARIES}"
