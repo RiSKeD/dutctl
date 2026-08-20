@@ -27,8 +27,7 @@ jobs:
     # STUB (test upstream only): the real workflow also requires
     #   github.event.workflow_run.head_repository.full_name != github.repository
     # so it fires for fork pull requests only. Dropped here so an ordinary
-    # same-repo pull request exercises the handoff, since forking into an org
-    # needs a token this account does not have.
+    # same-repo pull request exercises the handoff.
     if: >-
       github.event.workflow_run.event == 'pull_request' &&
       github.event.workflow_run.conclusion == 'success'
@@ -60,23 +59,35 @@ jobs:
         id: filenames
         run: |
           set -euo pipefail
+          shopt -s nullglob
+
           # This artifact was produced by a run of the contributor's code, so
-          # its contents are untrusted. Reject anything but a single, plainly
-          # named path before letting it reach GITHUB_OUTPUT: a filename
-          # containing a newline would otherwise let the artifact append
-          # arbitrary step outputs.
-          check() {
-            case "$1" in
-            "" | *[!A-Za-z0-9./_-]*)
+          # its contents are untrusted. Require exactly one match per pattern,
+          # and reject only the characters that would let a filename break out
+          # of the value it lands in: a newline appends arbitrary step outputs,
+          # and ';' or '=' forge extra entries in the BINARIES map below.
+          # Merely unusual characters are fine — goreleaser writes package
+          # names like dutctl_0.0.0~SNAPSHOT-c57fb1b_arm64.deb.
+          resolve() {
+            local what=$1
+            shift
+
+            if [ "$#" -ne 1 ]; then
+              echo "expected exactly one ${what}, found $#: $*" >&2
+              exit 1
+            fi
+
+            if [[ $1 == *$'\n'* || $1 == *';'* || $1 == *'='* ]]; then
               echo "refusing unexpected artifact path: $1" >&2
               exit 1
-              ;;
-            esac
+            fi
+
+            printf '%s\n' "$1"
           }
-          dutctl_path=$(ls ./bin/dutctl_linux_amd64_*/dutctl)
-          dutctl_pkg_path=$(ls ./bin/dutctl_*_arm64.deb)
-          check "$dutctl_path"
-          check "$dutctl_pkg_path"
+
+          dutctl_path=$(resolve "dutctl binary" ./bin/dutctl_linux_amd64_*/dutctl)
+          dutctl_pkg_path=$(resolve "dutctl arm64 package" ./bin/dutctl_*_arm64.deb)
+
           echo "dutctl_path=$dutctl_path" >> "${GITHUB_OUTPUT}"
           echo "dutctl_pkg_path=$dutctl_pkg_path" >> "${GITHUB_OUTPUT}"
 
